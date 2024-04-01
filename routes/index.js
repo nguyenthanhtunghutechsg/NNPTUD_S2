@@ -9,5 +9,4 @@ router.use('/authors',require('./authors'))
 router.use('/users',require('./users'))
 //localhost:3000/api/v1/auth
 router.use('/auth',require('./auth'))
-router.use('/users1',require('./users'))
 module.exports = router;

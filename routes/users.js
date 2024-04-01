@@ -1,15 +1,69 @@
 var express = require('express');
 var router = express.Router();
+var userModel = require('../schemas/user')
+var responseHandle = require('../helpers/responseHandle');
+var { validationResult } = require('express-validator');
+var check = require('../validators/user')
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
+
+router.get('/', async function (req, res, next) {
+  let users = await userModel.find({}).exec();
+  responseHandle.renderResponse(res, true, users)
 });
-router.get('/a', function(req, res, next) {
-  res.send('respond with a resource');
+
+router.get('/:id', async function (req, res, next) {
+  try {
+    let user = await userModel.find({ _id: req.params.id }).exec();
+    responseHandle.renderResponse(res, true, user)
+  } catch (error) {
+    responseHandle.renderResponse(res, false, error)
+  }
 });
-router.get('/b', function(req, res, next) {
-  res.send('respond with a resource');
+
+router.post('/', check(), async function (req, res, next) {
+  var result = validationResult(req);
+  if (result.errors.length > 0) {
+    responseHandle.renderResponse(res, false, result.errors)
+    return;
+  }
+  try {
+    var newUser = new userModel({
+      username: req.body.username,
+      password: req.body.password,
+      email: req.body.email,
+      role: req.body.role
+    })
+    await newUser.save();
+    responseHandle.renderResponse(res, true, newUser)
+  } catch (error) {
+    responseHandle.renderResponse(res, false, error)
+  }
+});
+router.put('/:id', async function (req, res, next) {
+  try {
+    let user = await userModel.findByIdAndUpdate
+      (req.params.id, req.body, {
+        new: true
+      })
+    responseHandle.renderResponse(res, true, user);
+  } catch (error) {
+    responseHandle.renderResponse(res, false, error)
+  }
+});
+
+
+router.delete('/:id', async function (req, res, next) {
+  try {
+    let user = await userModel.findByIdAndUpdate
+      (req.params.id, {
+        status: false
+      }, {
+        new: true
+      }).exec()
+    responseHandle.renderResponse(res, true, user);
+  } catch (error) {
+    responseHandle.renderResponse(res, false, error)
+  }
 });
 
 module.exports = router;
