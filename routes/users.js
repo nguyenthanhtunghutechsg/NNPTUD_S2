@@ -4,9 +4,11 @@ var userModel = require('../schemas/user')
 var responseHandle = require('../helpers/responseHandle');
 var { validationResult } = require('express-validator');
 var check = require('../validators/user')
+var protect = require('../middlewares/protect')
 
 
-router.get('/', async function (req, res, next) {
+router.get('/',protect , async function (req, res, next) {
+  console.log(req.headers.authorization);
   let users = await userModel.find({}).exec();
   responseHandle.renderResponse(res, true, users)
 });
