@@ -5,9 +5,10 @@ var responseHandle = require('../helpers/responseHandle');
 var { validationResult } = require('express-validator');
 var check = require('../validators/user')
 var protect = require('../middlewares/protect')
+var protectRole = require('../middlewares/protectRole');
 
 
-router.get('/',protect , async function (req, res, next) {
+router.get('/', protect,protectRole("ADMIN","modifier"), async function (req, res, next) {
   console.log(req.headers.authorization);
   let users = await userModel.find({}).exec();
   responseHandle.renderResponse(res, true, users)
@@ -22,7 +23,7 @@ router.get('/:id', async function (req, res, next) {
   }
 });
 
-router.post('/', check(), async function (req, res, next) {
+router.post('/', check(),protectRole("ADMIN"), async function (req, res, next) {
   var result = validationResult(req);
   if (result.errors.length > 0) {
     responseHandle.renderResponse(res, false, result.errors)
